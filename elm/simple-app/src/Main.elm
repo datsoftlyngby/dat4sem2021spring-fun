@@ -30,8 +30,8 @@ init = Model
 
 type Message
     = CelebratePet Int
-    | KillPet
-    | NameChanged String
+    | KillPet Int
+    | NameChanged Int String
 
 getPet : Int -> List Pet -> Maybe Pet
 getPet id pets =
@@ -45,29 +45,40 @@ setPet pet pets =
         [] -> [pet]
         p :: rest -> if pet.id == p.id then pet :: rest else p :: (setPet pet rest)
 
+updatePet : Int -> (Pet -> Pet) -> List Pet -> List Pet
+updatePet id action pets =
+    case pets of
+        [] -> []
+        head :: tail ->
+            if head.id == id then
+                action head :: tail
+            else
+                head :: (updatePet id action tail)
+
 update : Message -> Model -> Model
 update message model =
     case message of
         CelebratePet id ->
+            { model | pets = (updatePet id ( \pet -> { pet | age = pet.age + 1 } ) model.pets) }
+        KillPet id ->
+            { model | pets = (updatePet id ( \pet -> { pet | alive = False} ) model.pets) }
+{-
             let
                 maybePet = getPet id model.pets
             in
                 case maybePet of
                     Just pet ->
-                        let
-                            updatedPet = { pet | age = pet.age + 1 }
-                        in
-                            { model | pets = (setPet updatedPet model.pets) }
+                        { model | pets = (setPet { pet | age = pet.age + 1 } model.pets) }
                     Nothing ->
                         model
             -- { pet | age = (pet.age + 1) }
-        _ -> model
-{-
+
         KillPet ->
             { pet | alive = False }
         NameChanged newName ->
             { pet | name = newName }
 -}
+        _ -> model
 
 -- VIEW
 
@@ -81,12 +92,12 @@ viewPet : Pet -> Html Message
 viewPet pet =
     li []
         [ span [ style "marginRight" "1ex"] [ text (String.fromInt pet.id) ]
-        , input [ onInput NameChanged,  value pet.name ] []
+        , input [ onInput <| NameChanged pet.id,  value pet.name ] []
         , span
             [ style "color" (if pet.alive then "green" else "red") ]
             [ text (" is "++(String.fromInt pet.age)++" years old") ]
         , button [ onClick (CelebratePet pet.id)] [ text "Celebrate" ]
-        , button [ onClick KillPet ] [text "Kill" ]
+        , button [ onClick (KillPet pet.id) ] [text "Kill" ]
         ]
 
 --    div [ style "color" "red"] [ text ("Min kanin hedder "++pet.name) ]
