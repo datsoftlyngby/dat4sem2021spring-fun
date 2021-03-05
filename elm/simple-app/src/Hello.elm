@@ -30,6 +30,7 @@ type alias Address =
 
 type Model
   = Failure String
+  | Saving String
   | Waiting
   | Loading
   | Succes Greeter
@@ -37,6 +38,8 @@ type Model
 type Message
   = TryAgainPlease
   | GreetingResult (Result Http.Error Greeter)
+  | SaveStuff Greeter
+  | SaveResult (Result Http.Error String)
 
 init : () -> (Model, Cmd Message)
 init _ = (Waiting, Cmd.none)
@@ -62,6 +65,13 @@ update message model =
                     _ ->
                         (Failure "Unknown", Cmd.none)
 
+        SaveStuff greeter ->
+            (Loading, saveGreeting greeter)
+
+        SaveResult result ->
+            case result of
+                Ok msg -> (Saving msg, Cmd.none)
+                _ -> (Failure "?", Cmd.none)
 
 {-
 type Error
@@ -77,6 +87,15 @@ getGreeting = Http.get
     { url = "http://localhost:4711/"
     , expect = Http.expectJson GreetingResult greeterDecoder
     }
+
+
+saveGreeting : Greeter -> Cmd Message
+saveGreeting greeter = Http.post
+    { url = "http://localhost:4711/saveGreeting"
+    , body = Http.jsonBody (encodeGreeter greeter)
+    , expect = Http.expectString SaveResult
+    }
+
 
 streetDecoder: Decoder String
 streetDecoder =
@@ -116,6 +135,7 @@ view : Model -> Html Message
 view model =
     case model of
         Waiting -> button [ onClick TryAgainPlease ] [ text "Click for greeting"]
+        Saving msg -> text ("... saving "++msg++"...")
         Failure msg -> text ("Something went wrong: "++msg)
         Loading -> text "... please wait ..."
         Succes greeter ->
@@ -123,7 +143,9 @@ view model =
                 [ text ("The greeting from "++greeter.name++" who is "++(String.fromInt greeter.age)++" years old, was: "++greeter.greeting)
                 , text ("it lives at "++greeter.address.street++" in "++greeter.address.city)
                 , button [ onClick TryAgainPlease ] [ text "Click for new greeting" ]
+                , button [ onClick (SaveStuff greeter)] [ text "Save Stuff" ]
                 ]
+
 
 
 subscriptions : Model -> Sub Message
