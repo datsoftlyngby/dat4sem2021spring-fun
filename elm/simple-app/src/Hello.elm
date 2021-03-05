@@ -6,6 +6,7 @@ import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
 import Json.Decode exposing (Decoder, field, int, map2, map3, map4, string)
+import Json.Encode as Encode
 
 -- main : Program flags ...
 main = Browser.element
@@ -77,6 +78,10 @@ getGreeting = Http.get
     , expect = Http.expectJson GreetingResult greeterDecoder
     }
 
+streetDecoder: Decoder String
+streetDecoder =
+    field "address" (field "street" string)
+
 addressDecoder: Decoder Address
 addressDecoder =
     map2 Address
@@ -91,7 +96,21 @@ greeterDecoder =
         (field "age" int)
         (field "address" addressDecoder)
 
+encodeAddress : Address -> Encode.Value
+encodeAddress address =
+    Encode.object
+        [ ("street", Encode.string address.street)
+        , ("city", Encode.string address.city)
+        ]
 
+encodeGreeter : Greeter -> Encode.Value
+encodeGreeter greeter =
+    Encode.object
+        [ ("name", Encode.string greeter.name)
+        , ("greeting", Encode.string greeter.greeting)
+        , ("age", Encode.int greeter.age)
+        , ("address", encodeAddress greeter.address)
+        ]
 
 view : Model -> Html Message
 view model =

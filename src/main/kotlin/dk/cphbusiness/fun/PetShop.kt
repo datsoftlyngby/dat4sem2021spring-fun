@@ -1,6 +1,7 @@
 package dk.cphbusiness.`fun`
 
 import io.ktor.application.*
+import io.ktor.client.features.json.*
 import io.ktor.features.*
 import io.ktor.response.*
 import io.ktor.routing.*
@@ -12,6 +13,7 @@ fun main() {
         install(CORS) {
             anyHost()
             }
+        //install(JsonFeature)
         routing {
             get("/") {
                 Thread.sleep(500)
