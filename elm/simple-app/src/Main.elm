@@ -33,6 +33,7 @@ type Message
     | KillPet Int
     | NameChanged Int String
 
+{-
 getPet : Int -> List Pet -> Maybe Pet
 getPet id pets =
     case pets of
@@ -44,25 +45,48 @@ setPet pet pets =
     case pets of
         [] -> [pet]
         p :: rest -> if pet.id == p.id then pet :: rest else p :: (setPet pet rest)
+-}
 
-updatePet : Int -> (Pet -> Pet) -> List Pet -> List Pet
-updatePet id action pets =
+updatePet : Message -> Pet -> Pet
+updatePet message pet =
+    case message of
+        CelebratePet id ->
+            if pet.id == id then
+                { pet | age = pet.age + 1 }
+            else
+                pet
+        KillPet id -> if pet.id == id then { pet | alive = False } else pet
+        NameChanged id name -> if pet.id == id then { pet | name = name } else pet
+
+{-
+updatePets : Int -> (Pet -> Pet) -> List Pet -> List Pet
+updatePets id action pets =
     case pets of
         [] -> []
         head :: tail ->
             if head.id == id then
                 action head :: tail
             else
-                head :: (updatePet id action tail)
+                head :: (updatePets id action tail)
 
+updateModel : Int -> (Pet -> Pet) -> Model -> Model
+updateModel id action model =
+    { model | pets = updatePets id action model.pets }
+-}
 update : Message -> Model -> Model
 update message model =
+    { model | pets = (List.map (updatePet message) model.pets) }
+{-
     case message of
         CelebratePet id ->
-            { model | pets = (updatePet id ( \pet -> { pet | age = pet.age + 1 } ) model.pets) }
+            updateModel id ( \pet -> { pet | age = pet.age + 1 } ) model
         KillPet id ->
-            { model | pets = (updatePet id ( \pet -> { pet | alive = False} ) model.pets) }
+            { model | pets = (updatePets id ( \pet -> { pet | alive = False} ) model.pets) }
+        NameChanged id name ->
+            { model | pets = (updatePets id ( \pet -> { pet | name = name} ) model.pets) }
+-}
 {-
+        CelebratePet id ->
             let
                 maybePet = getPet id model.pets
             in
@@ -78,7 +102,7 @@ update message model =
         NameChanged newName ->
             { pet | name = newName }
 -}
-        _ -> model
+
 
 -- VIEW
 
