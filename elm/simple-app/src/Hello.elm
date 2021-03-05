@@ -5,12 +5,19 @@ import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
+import Json.Decode
 
+-- main : Program flags ...
 main = Browser.element
     { init = init
     , update = update
     , view = view
     , subscriptions = subscriptions
+    }
+
+type alias Greeting =
+    { name: String
+    , greeting: String
     }
 
 type Model
@@ -21,7 +28,7 @@ type Model
 
 type Message
   = TryAgainPlease
-  | GreetinResult (Result Http.Error String)
+  | GreetingResult (Result Http.Error String)
 
 init : () -> (Model, Cmd Message)
 init _ = (Waiting, Cmd.none)
@@ -33,7 +40,7 @@ update message model =
         TryAgainPlease ->
             (Loading, getGreeting)
 
-        GreetinResult result ->
+        GreetingResult result ->
             case result of
                 Ok greetingText -> (Succes greetingText, Cmd.none)
                 Err error ->
@@ -58,8 +65,13 @@ type Error
 getGreeting : Cmd Message
 getGreeting = Http.get
     { url = "http://localhost:4711/"
-    , expect = Http.expectString GreetinResult
+    , expect = Http.expectJson GreetingResult greetingDecoder
     }
+
+greetingDecoder : Json.Decode.Decoder String
+greetingDecoder =
+    Json.Decode.field "name" Json.Decode.string
+
 
 
 view : Model -> Html Message
