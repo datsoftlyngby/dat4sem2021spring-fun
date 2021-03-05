@@ -15,7 +15,7 @@ fun main() {
         routing {
             get("/") {
                 Thread.sleep(500)
-                call.respondText("""{ "greeting": "Hello ${System.nanoTime()}", "name": "Anders" }""")
+                call.respondText("""{ "greeting": "Hello ${System.nanoTime()}", "name": "Anders", "age": 61, "address": { "street": "Bygaden 7", "town": "Paris" } }""")
                 }
             }
         }.start(wait = true)
