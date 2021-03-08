@@ -13,9 +13,9 @@ fun main() {
         install(CORS) {
             anyHost()
             }
-        install(JsonFeature) {
-            serializer = GsonSerializer()
-            }
+//        install(JsonFeature) {
+//            serializer = GsonSerializer()
+//            }
         routing {
             get("/") {
                 Thread.sleep(500)
