@@ -5,8 +5,9 @@ import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import Json.Decode exposing (Decoder, field, int, map2, map3, map4, string)
-import Json.Encode as Encode
+import Greeter exposing(Greeter, greeterDecoder, encodeGreeter)
+-- import Json.Decode exposing (Decoder, field, int, map2, map3, map4, string)
+-- import Json.Encode as Encode
 
 -- main : Program flags ...
 main = Browser.element
@@ -16,6 +17,7 @@ main = Browser.element
     , subscriptions = subscriptions
     }
 
+{-
 type alias Greeter =
     { name: String
     , greeting: String
@@ -27,6 +29,7 @@ type alias Address =
     { street: String
     , city: String
     }
+-}
 
 type Model
   = Failure String
@@ -44,6 +47,22 @@ type Message
 init : () -> (Model, Cmd Message)
 init _ = (Waiting, Cmd.none)
 
+handleError : Http.Error -> (Model, Cmd Message)
+handleError error =
+    case error of
+        Http.BadStatus code ->
+          (Failure <| "Code: "++(String.fromInt code), Cmd.none)
+        Http.NetworkError ->
+          (Failure "Network Error", Cmd.none)
+        Http.BadBody err ->
+          (Failure <| "Bad Body: "++err, Cmd.none)
+        Http.Timeout ->
+          (Failure "Timeout", Cmd.none)
+        Http.BadStatus status ->
+          (Failure <| "Bad Status: "++(String.fromInt status), Cmd.none)
+        Http.BadUrl string ->
+          (Failure <| "Bad Url: "++string, Cmd.none)
+
 
 update : Message -> Model -> (Model, Cmd Message)
 update message model =
@@ -54,16 +73,7 @@ update message model =
         GreetingResult result ->
             case result of
                 Ok greeting -> (Succes greeting, Cmd.none)
-                Err error ->
-                  case error of
-                    Http.BadStatus code ->
-                      (Failure ("Code: "++(String.fromInt code)), Cmd.none)
-                    Http.NetworkError ->
-                      (Failure "Network Error", Cmd.none)
-                    Http.BadBody err ->
-                      (Failure err, Cmd.none)
-                    _ ->
-                        (Failure "Unknown", Cmd.none)
+                Err error -> handleError error
 
         SaveStuff greeter ->
             (Loading, saveGreeting greeter)
@@ -71,17 +81,8 @@ update message model =
         SaveResult result ->
             case result of
                 Ok msg -> (Saving msg, Cmd.none)
-                _ -> (Failure "?", Cmd.none)
+                Err error -> handleError error
 
-{-
-type Error
-    = BadUrl String
-    | Timeout
-    | NetworkError
-    | BadStatus Int
-    | BadBody String
-
--}
 getGreeting : Cmd Message
 getGreeting = Http.get
     { url = "http://localhost:4711/"
@@ -96,7 +97,7 @@ saveGreeting greeter = Http.post
     , expect = Http.expectString SaveResult
     }
 
-
+{-
 streetDecoder: Decoder String
 streetDecoder =
     field "address" (field "street" string)
@@ -130,6 +131,7 @@ encodeGreeter greeter =
         , ("age", Encode.int greeter.age)
         , ("address", encodeAddress greeter.address)
         ]
+-}
 
 view : Model -> Html Message
 view model =
@@ -141,7 +143,7 @@ view model =
         Succes greeter ->
             div []
                 [ text ("The greeting from "++greeter.name++" who is "++(String.fromInt greeter.age)++" years old, was: "++greeter.greeting)
-                , text ("it lives at "++greeter.address.street++" in "++greeter.address.city)
+                , text (" it lives at "++greeter.address.street++" in "++greeter.address.city)
                 , button [ onClick TryAgainPlease ] [ text "Click for new greeting" ]
                 , button [ onClick (SaveStuff greeter)] [ text "Save Stuff" ]
                 ]
