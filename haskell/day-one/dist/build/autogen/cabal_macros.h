@@ -14,6 +14,13 @@
   (major1) == 4 && (major2) <  9 || \
   (major1) == 4 && (major2) == 9 && (minor) <= 0)
 
+/* package JuicyPixels-3.3.5 */
+#define VERSION_JuicyPixels "3.3.5"
+#define MIN_VERSION_JuicyPixels(major1,major2,minor) (\
+  (major1) <  3 || \
+  (major1) == 3 && (major2) <  3 || \
+  (major1) == 3 && (major2) == 3 && (minor) <= 5)
+
 /* tool gcc-12.0.0 */
 #define TOOL_VERSION_gcc "12.0.0"
 #define MIN_TOOL_VERSION_gcc(major1,major2,minor) (\

@@ -34,14 +34,45 @@ data Line3D = Line3D
 data Sphere3D = Sphere3D
   { center :: Vector3D
   , radius :: Float
-  }
+  } deriving (Show)
 
 eye :: Vector3D
 eye = Vector3D 0 0 0
+
+sphere :: Sphere3D
+sphere = Sphere3D (Vector3D 0 10 0) 2
 
 lineFrom :: Vector3D -> Vector3D -> Line3D
 lineFrom o t = Line3D o u where
   v = sub3D t o -- find vector from o to t : t - o
   u = mul3D v (1.0/size3D v)
 
--- intersectDistance :: Sphere3D -> Line3D -> Maybe Float
+dist3D :: Sphere3D -> Line3D -> Maybe Float
+dist3D (Sphere3D c r) (Line3D o u) =
+  if f < 0 then Nothing
+  else Just ((-b - sqrt f)/2.0)
+  where
+    oc = sub3D o c
+    b = 2*(dot3D u oc)
+    f = b**2 - 4*(dot3D oc oc - r**2)
+
+linePoint3D :: Line3D -> Float -> Vector3D
+linePoint3D (Line3D o u) distance =
+  add3D o (mul3D u distance)
+
+
+reflect3D :: Sphere3D -> Line3D -> Maybe Line3D
+reflect3D sphere line = fmap reflected distance where
+  distance = dist3D sphere line
+  reflected :: Float -> Line3D
+  reflected d = Line3D t v where
+    t = linePoint3D line d
+    u = unit line
+    n = mul3D (sub3D t (center sphere)) (1.0/(radius sphere))
+    v = add3D u (mul3D n (-2*(dot3D u n)))
+
+reflectedLine3D :: Sphere3D -> Line3D -> Line3D
+reflectedLine3D sphere line =
+  case (reflect3D sphere line) of
+    Just reflection -> reflection
+    Nothing -> line
