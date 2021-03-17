@@ -7,8 +7,25 @@ data Vector3D = Vector3D
   } deriving (Show)
 
 add3D :: Vector3D -> Vector3D -> Vector3D
+add3D v1 v2 =
+  Vector3D (x v1 + x v2) (y v1 + y v2) (z v1 + z v2)
+{-
 add3D (Vector3D x1 y1 z1) (Vector3D x2 y2 z2) =
   Vector3D (x1 + x2) (y1 + y2) (z1 + z2)
+-}
+
+-- not used here ;-)
+-- sumOfList :: [Int] -> Int
+-- sumOfList [] = 0
+-- sumOfList first : rest = first + sumOfList rest
+
+{- Elm equivalent
+sumOfList : List Int -> Int
+sumOfList l =
+  case l of
+    [] -> 0
+    first :: rest -> first + sumOfList rest
+-}
 
 sub3D :: Vector3D -> Vector3D -> Vector3D
 sub3D (Vector3D x1 y1 z1) (Vector3D x2 y2 z2) =
@@ -76,3 +93,19 @@ reflectedLine3D sphere line =
   case (reflect3D sphere line) of
     Just reflection -> reflection
     Nothing -> line
+
+data Color3D = SkyColor | DarkColor | BrightColor deriving (Show)
+
+-- xi = hvor langt til siden på jorden
+-- yi = hvor langt ude på jorden
+
+reflectedColor3D :: Line3D -> Color3D
+reflectedColor3D (Line3D o u)
+  | (z u) >= 0 =                                 SkyColor
+  | (mod (round xi) 3)*(mod (round yi) 3) == 0 = DarkColor
+  | otherwise =                                  BrightColor
+  where
+    h = (z o) - 2
+    f = -h/(z u)
+    xi = (x o) + (x u)*f
+    yi = (y o) + (y u)*f
