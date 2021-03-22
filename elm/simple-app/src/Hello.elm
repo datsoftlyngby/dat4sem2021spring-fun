@@ -5,9 +5,7 @@ import Browser
 import Html exposing (..)
 import Html.Events exposing (onClick)
 import Http
-import Greeter exposing(Greeter, greeterDecoder, encodeGreeter)
--- import Json.Decode exposing (Decoder, field, int, map2, map3, map4, string)
--- import Json.Encode as Encode
+import Greeter exposing (Greeter, greeterDecoder, encodeGreeter)
 
 -- main : Program flags ...
 main = Browser.element
@@ -16,20 +14,6 @@ main = Browser.element
     , view = view
     , subscriptions = subscriptions
     }
-
-{-
-type alias Greeter =
-    { name: String
-    , greeting: String
-    , age: Int
-    , address: Address
-    }
-
-type alias Address =
-    { street: String
-    , city: String
-    }
--}
 
 type Model
   = Failure String
@@ -50,8 +34,6 @@ init _ = (Waiting, Cmd.none)
 handleError : Http.Error -> (Model, Cmd Message)
 handleError error =
     case error of
-        Http.BadStatus code ->
-          (Failure <| "Code: "++(String.fromInt code), Cmd.none)
         Http.NetworkError ->
           (Failure "Network Error", Cmd.none)
         Http.BadBody err ->
@@ -85,14 +67,14 @@ update message model =
 
 getGreeting : Cmd Message
 getGreeting = Http.get
-    { url = "http://localhost:4711/"
+    { url = "http://localhost:4711/greeter"
     , expect = Http.expectJson GreetingResult greeterDecoder
     }
 
 
 saveGreeting : Greeter -> Cmd Message
 saveGreeting greeter = Http.post
-    { url = "http://localhost:4711/saveGreeting"
+    { url = "http://localhost:4711/saveGreeter"
     , body = Http.jsonBody (encodeGreeter greeter)
     , expect = Http.expectString SaveResult
     }
