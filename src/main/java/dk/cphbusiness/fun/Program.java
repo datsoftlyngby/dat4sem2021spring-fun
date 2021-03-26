@@ -11,13 +11,24 @@ public class Program {
     list.add(7);
     list.add(8);
     list.add(9);
+    list.add(13);
 
-    var l2 = list.stream()
-        .map(x -> 2*x).collect(Collectors.toList());
+    var sum = list.stream()
+        .filter(x -> x%2 == 1)
+        .map(x -> 2*x)
+        .reduce(0, (acc, x) -> acc + x);
 
-    for (int i : l2) {
-      System.out.println(i);
-      }
+//      (0, 14) -> 14
+//      (14, 18) -> 32
+//      (32, 26) -> 58
+
+    System.out.println("Sum is "+sum);
+
+//        .collect(Collectors.toList());
+
+//    for (int i : l2) {
+//      System.out.println(i);
+//      }
     }
 
   }
