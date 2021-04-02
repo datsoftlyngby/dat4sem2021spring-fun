@@ -15,12 +15,22 @@ main = Browser.element
     , subscriptions = subscriptions
     }
 
+{-
+type alias Employee = { name : String, phone: String }
+
+validateEmployee : Employee -> Maybe String
+validateEmployee employee =
+    if employee.name == "" then Just "Der skal være et navn"
+    else if fejlIparse then Just "Kun tal i telefonnummer"
+    else Nothing
+-}
 type Model
   = Failure String
   | Saving String
   | Waiting
   | Loading
   | Succes Greeter
+  -- | Edit Employee
 
 type Message
   = TryAgainPlease

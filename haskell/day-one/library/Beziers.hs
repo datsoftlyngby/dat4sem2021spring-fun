@@ -89,5 +89,5 @@ anim1 :: Anim
 anim1 = quadratic bezier1 bezier3 bezier2
 
 main :: IO ()
--- main = showAnim anim1
-main = showCurve bezier1
+main = showAnim anim1
+-- main = showCurve bezier1
